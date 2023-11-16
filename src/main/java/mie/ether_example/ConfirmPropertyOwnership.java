@@ -22,7 +22,8 @@
 //	}
 //}
 package mie.ether_example;
-
+import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.JavaDelegate;
 import org.web3j.protocol.Web3j;

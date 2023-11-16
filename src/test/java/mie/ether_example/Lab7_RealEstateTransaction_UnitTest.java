@@ -1,5 +1,6 @@
 package mie.ether_example;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -34,6 +35,20 @@ import edu.toronto.dbservice.types.EtherAccount;
 
 import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricProcessInstance;
+import org.flowable.engine.RuntimeService;
+import org.flowable.engine.TaskService;
+import org.flowable.engine.test.FlowableRule;
+import org.flowable.engine.runtime.ProcessInstance;
+import org.flowable.task.api.Task;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(Parameterized.class)
 public class Lab7_RealEstateTransaction_UnitTest extends LabBaseUnitTest {
@@ -118,28 +133,81 @@ public class Lab7_RealEstateTransaction_UnitTest extends LabBaseUnitTest {
 		return false;
 	}
 	
-//	@Test
-//	public void testTransactionBuyerClientOnly() {
-//	    // Set up the process variables
-//	    HashMap<String, Object> variables = new HashMap<>();
-//	    variables.put("buyerName", "BuyerClient");
-//	    variables.put("sellerName", "NonClientSeller");
-//	    variables.put("propertyAddress", "123 Main St");
-//	    variables.put("soldPrice", "500000");
-//	    variables.put("fundsInEscrow", "true");
-//
-//	    // Start the process with these variables
-//	    RuntimeService runtimeService = flowableContext.getRuntimeService();
-//	    ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("process1", variables);
-//
-//	    // Add assertions to check the expected outcome
-//	    // Assuming the process ends with a variable "transactionStatus" indicating success or cancellation
-//	    String transactionStatus = (String) runtimeService.createVariableInstanceQuery()
-//	                                    .processInstanceId(processInstance.getId())
-//	                                    .variableName("transactionStatus")
-//	                                    .singleResult()
-//	                                    .getValue();
-//	    assertEquals("Proceed", transactionStatus);
-//	}
+	//Q6
+	@Test
+	public void testTransactionBuyerClientOnly() {
+	    // Set up the process variables
+	    HashMap<String, Object> variables = new HashMap<>();
+	    variables.put("buyerName", "BuyerClient");
+	    variables.put("sellerName", "NonClientSeller");
+	    variables.put("propertyAddress", "123 Main St");
+	    variables.put("soldPrice", "500000");
+	    variables.put("fundsInEscrow", "true");
+
+	    // Start the process with these variables
+	    RuntimeService runtimeService = flowableContext.getRuntimeService();
+	    ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("process1", variables);
+
+	    // Use HistoryService to query the process variable
+	    HistoryService historyService = flowableContext.getHistoryService();
+	    String transactionStatus = (String) historyService.createHistoricVariableInstanceQuery()
+	                                    .processInstanceId(processInstance.getId())
+	                                    .variableName("transactionStatus")
+	                                    .singleResult()
+	                                    .getValue();
+	    assertEquals("Proceed", transactionStatus);
+	}
+	//Q7
+	@Test
+	public void testTransactionBothClient() {
+	    // Set up the process variables
+	    HashMap<String, Object> variables = new HashMap<>();
+	    variables.put("buyerName", "BuyerClient");
+	    variables.put("sellerName", "SellerClient");
+	    variables.put("propertyAddress", "456 Park Ave");
+	    variables.put("soldPrice", "600000");
+	    variables.put("fundsInEscrow", "true");
+
+	    // Start the process with these variables
+	    RuntimeService runtimeService = flowableContext.getRuntimeService();
+	    ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("process1", variables);
+
+	 // Use HistoryService to query the process variable
+	    HistoryService historyService = flowableContext.getHistoryService();
+	    String transactionStatus = (String) historyService.createHistoricVariableInstanceQuery()
+	                                    .processInstanceId(processInstance.getId())
+	                                    .variableName("transactionStatus")
+	                                    .singleResult()
+	                                    .getValue();
+	    assertEquals("Proceed", transactionStatus);
+	}
+	//Q8
+	@Test
+	public void testTransactionBuyerClientSellerNotOwner() {
+	    // Set up the process variables
+	    HashMap<String, Object> variables = new HashMap<>();
+	    variables.put("buyerName", "BuyerClient");
+	    variables.put("sellerName", "FakeOwner");
+	    variables.put("propertyAddress", "789 Elm St");
+	    variables.put("soldPrice", "400000");
+	    variables.put("fundsInEscrow", "true");
+
+	    // Start the process with these variables
+	    RuntimeService runtimeService = flowableContext.getRuntimeService();
+	    ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("process1", variables);
+
+	    // Add assertions to check the expected outcome
+	 // Use HistoryService to query the process variable
+	    HistoryService historyService = flowableContext.getHistoryService();
+	    String transactionStatus = (String) historyService.createHistoricVariableInstanceQuery()
+	                                    .processInstanceId(processInstance.getId())
+	                                    .variableName("transactionStatus")
+	                                    .singleResult()
+	                                    .getValue();
+	    assertEquals("Cancel", transactionStatus);
+	}
+
+
+
 
 }
